@@ -7,8 +7,8 @@ import { ExternalLink, LinkIcon, MoreHorizontal, Plus } from "lucide-react"
 import { Badge } from "~/components/ui/badge"
 import { notFound } from "next/navigation"
 
-export default function ProjectLinksPage({ params }: { params: { id: string } }) {
-  const projectId = params.id
+export default async function ProjectLinksPage({ params }: { params: { id: string } }) {
+  const projectId = (await params).id
 
   // Find the project by ID
   const project = projects.find((p) => p.id === projectId)

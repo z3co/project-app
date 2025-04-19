@@ -8,13 +8,14 @@ import Link from "next/link"
 import { Button } from "~/components/ui/button"
 import { ChevronLeft } from "lucide-react"
 
-export default function ProjectLayout({
+export default async function ProjectLayout({
   children,
   params,
 }: {
   children: React.ReactNode
   params: { id: string }
 }) {
+  const { id } = await params
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -26,7 +27,7 @@ export default function ProjectLayout({
                 <span className="sr-only">Back to projects</span>
               </Link>
             </Button>
-            <MainNav projectId={params.id} />
+            <MainNav projectId={id} />
           </div>
           <div className="flex items-center gap-4">
             <Search />
