@@ -12,6 +12,7 @@
 - [ ] Proper home page
 - [ ] Onboarding new users
 - [ ] Proper scaling and error handling
+- [ ] Consider making endDate optional for projects
 
 ## 20/04/2025
 Just finished db schemas and pushed them to singlestore next are:
