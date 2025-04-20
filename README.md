@@ -1,4 +1,21 @@
-## 19/04/2025
-Just pushed a test db schema and setup a connection to singlestore next are:
+# TODO
 
-- [ ] Setup a db schema
+- [ ] Connect database to frontend
+- [ ] Creating editing and deleting todos, links and notes
+- [ ] Fixing linting and type errors on the dashboard
+- [ ] Creating projects
+- [ ] Setup project completion levels
+- [ ] Adding auth
+- [ ] Adding groups
+- [ ] Uploading files
+- [ ] Searching
+- [ ] Proper home page
+- [ ] Onboarding new users
+- [ ] Proper scaling and error handling
+
+## 20/04/2025
+Just finished db schemas and pushed them to singlestore next are:
+
+- [ ] Seed db with test data
+- [ ] Connecting db to frontend
+- [ ] Fix project dashboard
