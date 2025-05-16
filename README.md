@@ -17,6 +17,7 @@
 ## 20/04/2025
 Just finished db schemas and pushed them to singlestore next are:
 
-- [ ] Seed db with test data
+- [x] Seed db with test data
+- [x] Refactor mock-data
 - [ ] Connecting db to frontend
 - [ ] Fix project dashboard
