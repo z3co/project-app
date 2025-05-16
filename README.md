@@ -20,4 +20,5 @@ Just finished db schemas and pushed them to singlestore next are:
 - [x] Seed db with test data
 - [x] Refactor mock-data
 - [ ] Connecting db to frontend
+- [ ] Fix type errors
 - [ ] Fix project dashboard
