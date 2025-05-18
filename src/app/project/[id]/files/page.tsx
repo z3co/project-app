@@ -1,32 +1,60 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { projectFiles, projects } from "~/lib/mock-data"
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { Download, File, FileText, MoreHorizontal, Upload } from "lucide-react"
-import { Badge } from "~/components/ui/badge"
-import { notFound } from "next/navigation"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Download, MoreHorizontal, Upload } from "lucide-react";
+import { notFound } from "next/navigation";
+import { db } from "~/server/db";
+import { project_table, file_table } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 
-export default async function ProjectFilesPage({ params }: { params: { id: string } }) {
-  const projectId = (await params).id
+export default async function ProjectFilesPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { id } = await params; // eslint-disable-line
 
   // Find the project by ID
-  const project = projects.find((p) => p.id === projectId)
+  const projectResponse = await db
+    .select()
+    .from(project_table)
+    .where(eq(project_table.id, parseInt(id)))
+    .limit(1);
 
   // If project not found, show 404
-  if (!project) {
-    notFound()
+  if (!projectResponse[0]) {
+    notFound();
   }
 
-  // Get project-specific files
-  const files = projectFiles[projectId] || []
+  const project = projectResponse[0];
+
+  // Get project-specific todos
+  const files = await db
+    .select()
+    .from(file_table)
+    .where(eq(file_table.parentId, parseInt(id)));
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Files</h2>
-          <p className="text-muted-foreground">Manage files for {project.name}</p>
+          <p className="text-muted-foreground">
+            Manage files for {project.name}
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button>
@@ -61,8 +89,12 @@ export default async function ProjectFilesPage({ params }: { params: { id: strin
         <CardContent>
           <div className="space-y-4">
             {files.map((file) => (
-              <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div
+                key={file.id}
+                className="flex items-center justify-between rounded-lg border p-4"
+              >
                 <div className="flex items-center gap-4">
+                  {/**
                   {file.type === "pdf" ? (
                     <FileText className="h-10 w-10 text-red-500" />
                   ) : file.type === "docx" ? (
@@ -74,13 +106,22 @@ export default async function ProjectFilesPage({ params }: { params: { id: strin
                   ) : (
                     <File className="h-10 w-10 text-gray-500" />
                   )}
+                **/}
                   <div>
                     <p className="font-medium">{file.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="outline">{file.type.toUpperCase()}</Badge>
-                      <span className="text-xs text-muted-foreground">Size: {file.size}</span>
-                      <span className="text-xs text-muted-foreground">Uploaded: {file.uploadedAt}</span>
-                      <span className="text-xs text-muted-foreground">By: {file.uploadedBy}</span>
+                    <div className="mt-1 flex items-center gap-2">
+                      {/** <Badge variant="outline">{file.type.toUpperCase()}</Badge> **/}
+                      <span className="text-muted-foreground text-xs">
+                        Size: {file.size}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        Uploaded: {file.createdAt.toString()}
+                      </span>
+                      {/**
+                      <span className="text-muted-foreground text-xs">
+                        By: {file}
+                      </span>
+                      **/}
                     </div>
                   </div>
                 </div>
@@ -99,5 +140,5 @@ export default async function ProjectFilesPage({ params }: { params: { id: strin
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

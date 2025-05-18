@@ -1,32 +1,59 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { projectNotes, projects } from "~/lib/mock-data"
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { Edit, MoreHorizontal, Plus } from "lucide-react"
-import { Badge } from "~/components/ui/badge"
-import { notFound } from "next/navigation"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Edit, MoreHorizontal, Plus } from "lucide-react";
+import { notFound } from "next/navigation";
+import { db } from "~/server/db";
+import { note_table, project_table } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 
-export default async function ProjectNotesPage({ params }: { params: { id: string } }) {
-  const projectId = (await params).id
+export default async function ProjectNotesPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { id } = await params; // eslint-disable-line
 
   // Find the project by ID
-  const project = projects.find((p) => p.id === projectId)
+  const projectResponse = await db
+    .select()
+    .from(project_table)
+    .where(eq(project_table.id, parseInt(id)))
+    .limit(1);
 
   // If project not found, show 404
-  if (!project) {
-    notFound()
+  if (!projectResponse[0]) {
+    notFound();
   }
 
-  // Get project-specific notes
-  const notes = projectNotes[projectId] || []
+  const project = projectResponse[0];
 
+  // Get project-specific todos
+  const notes = await db
+    .select()
+    .from(note_table)
+    .where(eq(note_table.parentId, parseInt(id)));
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Notes</h2>
-          <p className="text-muted-foreground">Manage notes for {project.name}</p>
+          <p className="text-muted-foreground">
+            Manage notes for {project.name}
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button>
@@ -69,15 +96,12 @@ export default async function ProjectNotesPage({ params }: { params: { id: strin
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge>{note.category}</Badge>
-                    <span className="text-xs text-muted-foreground">Created: {note.createdAt}</span>
-                    <span className="text-xs text-muted-foreground">By: {note.createdBy}</span>
-                  </div>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
-                  <p className="text-sm text-muted-foreground">{note.content}</p>
-                  <div className="flex justify-end mt-4">
+                  <p className="text-muted-foreground text-sm">
+                    {note.content}
+                  </p>
+                  <div className="mt-4 flex justify-end">
                     <Button variant="outline" size="sm">
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
@@ -90,5 +114,5 @@ export default async function ProjectNotesPage({ params }: { params: { id: strin
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

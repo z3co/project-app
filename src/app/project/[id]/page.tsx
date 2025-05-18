@@ -1,38 +1,75 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { projectTodos, projectLinks, projects } from "~/lib/mock-data"
-import { BarChart, CheckCircle, FileText, Link, ListTodo, MoreHorizontal } from "lucide-react"
-import { Button } from "~/components/ui/button"
-import { Progress } from "~/components/ui/progress"
-import { notFound } from "next/navigation"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import {
+  BarChart,
+  CheckCircle,
+  FileText,
+  Link,
+  ListTodo,
+  MoreHorizontal,
+} from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { Progress } from "~/components/ui/progress";
+import { notFound } from "next/navigation";
+import { db } from "~/server/db";
+import { link_table, project_table, todo_table } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 
-export default function ProjectDashboardPage({ params }: { params: { id: string } }) {
-  const projectId = params.id
+export default async function ProjectDashboardPage({
+  params,
+}: {
+  params: { id: string };
+}) {
 
-  // Find the project by ID
-  const project = projects.find((p) => p.id === projectId)
+  const { id } = await params; // eslint-disable-line
+
+  const projectFromDb = await db
+    .select()
+    .from(project_table)
+    .where(eq(project_table.id, parseInt(id)))
+    .limit(1);
 
   // If project not found, show 404
-  if (!project) {
-    notFound()
+  if (!projectFromDb[0]) {
+    notFound();
   }
+  const project = projectFromDb[0];
 
   // Get project-specific data
-  const todos = projectTodos[projectId] || []
-  const links = projectLinks[projectId] || []
+  const todos = await db
+    .select()
+    .from(todo_table)
+    .where(eq(todo_table.parentId, parseInt(id)));
+  const links = await db
+    .select()
+    .from(link_table)
+    .where(eq(link_table.parentId, parseInt(id)));
 
   // Calculate project-specific stats
-  const completedTodos = todos.filter((todo) => todo.status === "completed").length
-  const inProgressTodos = todos.filter((todo) => todo.status === "in-progress").length
-  const pendingTodos = todos.filter((todo) => todo.status === "pending").length
-  const totalTodos = todos.length
+  const completedTodos = todos.filter(
+    (todo) => todo.status === "completed",
+  ).length;
+  const inProgressTodos = todos.filter(
+    (todo) => todo.status === "in-progress",
+  ).length;
+  const pendingTodos = todos.filter((todo) => todo.status === "pending").length;
+  const totalTodos = todos.length;
+  const team = ["Jeppe Johansen", "Hanne Clausen"];
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{project.name}</h2>
-          <p className="text-muted-foreground">{project.description}</p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            {project?.description}
+          </h2>
+          <p className="text-muted-foreground">{project?.description}</p>
         </div>
         <div className="flex items-center space-x-2">
           <Button>Download Report</Button>
@@ -42,27 +79,39 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Project Status</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              Project Status
+            </CardTitle>
+            <BarChart className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{project.status}</div>
-            <Progress value={project.completionPercentage} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-2">{project.completionPercentage}% complete</p>
+            <Progress value={50} className="mt-2" />
+            <p className="text-muted-foreground mt-2 text-xs">
+              {"50"}% complete
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Todo Completion</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              Todo Completion
+            </CardTitle>
+            <CheckCircle className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {totalTodos > 0 ? Math.round((completedTodos / totalTodos) * 100) : 0}%
+              {totalTodos > 0
+                ? Math.round((completedTodos / totalTodos) * 100)
+                : 0}
+              %
             </div>
-            <Progress value={totalTodos > 0 ? (completedTodos / totalTodos) * 100 : 0} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-2">
+            <Progress
+              value={totalTodos > 0 ? (completedTodos / totalTodos) * 100 : 0}
+              className="mt-2"
+            />
+            <p className="text-muted-foreground mt-2 text-xs">
               {completedTodos} of {totalTodos} tasks completed
             </p>
           </CardContent>
@@ -71,22 +120,21 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Timeline</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <FileText className="text-muted-foreground h-4 w-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{project.startDate}</div>
-            <p className="text-xs text-muted-foreground">to {project.endDate}</p>
-          </CardContent>
+          <CardContent></CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Team</CardTitle>
-            <ListTodo className="h-4 w-4 text-muted-foreground" />
+            <ListTodo className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{project.team.length}</div>
-            <p className="text-xs text-muted-foreground">team members assigned</p>
+            <div className="text-2xl font-bold">{team.length}</div>
+            <p className="text-muted-foreground text-xs">
+              team members assigned
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -105,26 +153,28 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
               <CardHeader>
                 <CardTitle>Recent Todos</CardTitle>
                 <CardDescription>
-                  You have {inProgressTodos} tasks in progress and {pendingTodos} pending.
+                  You have {inProgressTodos} tasks in progress and{" "}
+                  {pendingTodos} pending.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {todos.slice(0, 3).map((todo) => (
-                    <div key={todo.id} className="flex items-center justify-between p-2 border rounded-lg">
+                    <div
+                      key={todo.id}
+                      className="flex items-center justify-between rounded-lg border p-2"
+                    >
                       <div className="flex items-center gap-2">
                         <div
-                          className={`w-2 h-2 rounded-full ${
-                            todo.status === "completed"
+                          className={`h-2 w-2 rounded-full ${todo.status === "completed"
                               ? "bg-green-500"
                               : todo.status === "in-progress"
                                 ? "bg-blue-500"
                                 : "bg-yellow-500"
-                          }`}
+                            }`}
                         />
                         <div>
                           <p className="text-sm font-medium">{todo.title}</p>
-                          <p className="text-xs text-muted-foreground">Due: {todo.dueDate}</p>
                         </div>
                       </div>
                       <Button variant="ghost" size="icon">
@@ -139,17 +189,21 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
             <Card className="col-span-3">
               <CardHeader>
                 <CardTitle>Recent Links</CardTitle>
-                <CardDescription>You have {links.length} saved links for this project.</CardDescription>
+                <CardDescription>
+                  You have {links.length} saved links for this project.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {links.slice(0, 3).map((link) => (
-                    <div key={link.id} className="flex items-center justify-between p-2 border rounded-lg">
+                    <div
+                      key={link.id}
+                      className="flex items-center justify-between rounded-lg border p-2"
+                    >
                       <div className="flex items-center gap-2">
                         <Link className="h-4 w-4 text-blue-500" />
                         <div>
                           <p className="text-sm font-medium">{link.title}</p>
-                          <p className="text-xs text-muted-foreground">{link.category}</p>
                         </div>
                       </div>
                       <Button variant="ghost" size="icon">
@@ -171,10 +225,13 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {project.team.map((member, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 border rounded-lg">
+                {team.map((member, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg border p-2"
+                  >
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                      <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full">
                         {member
                           .split(" ")
                           .map((name) => name[0])
@@ -182,7 +239,9 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
                       </div>
                       <div>
                         <p className="text-sm font-medium">{member}</p>
-                        <p className="text-xs text-muted-foreground">Team Member</p>
+                        <p className="text-muted-foreground text-xs">
+                          Team Member
+                        </p>
                       </div>
                     </div>
                     <Button variant="ghost" size="icon">
@@ -201,7 +260,7 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
               <CardTitle>Recent Activity</CardTitle>
               <CardDescription>Recent actions on this project.</CardDescription>
             </CardHeader>
-            <CardContent className="h-[300px] flex items-center justify-center">
+            <CardContent className="flex h-[300px] items-center justify-center">
               <p className="text-muted-foreground">Activity feed coming soon</p>
             </CardContent>
           </Card>
@@ -211,14 +270,18 @@ export default function ProjectDashboardPage({ params }: { params: { id: string 
           <Card>
             <CardHeader>
               <CardTitle>Project Settings</CardTitle>
-              <CardDescription>Manage project settings and preferences.</CardDescription>
+              <CardDescription>
+                Manage project settings and preferences.
+              </CardDescription>
             </CardHeader>
-            <CardContent className="h-[300px] flex items-center justify-center">
-              <p className="text-muted-foreground">Settings panel coming soon</p>
+            <CardContent className="flex h-[300px] items-center justify-center">
+              <p className="text-muted-foreground">
+                Settings panel coming soon
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
