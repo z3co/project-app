@@ -9,7 +9,7 @@
 - [ ] Adding groups
 - [ ] Uploading files
 - [ ] Searching
-- [ ] Fixing cards and completion percentages
+- [ ] Fixing cards, completion percentages and consider refactoring commented out code or removing it
 - [ ] Proper home page
 - [ ] Onboarding new users
 - [ ] Proper scaling and error handling
