@@ -28,11 +28,14 @@ export default async function ProjectDashboardPage({
 }) {
 
   const { id } = await params; // eslint-disable-line
+  const projectId = Number.parseInt(id, 10);
+  if (Number.isNaN(projectId)) notFound();
+
 
   const projectFromDb = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, parseInt(id)))
+    .where(eq(project_table.id, projectId))
     .limit(1);
 
   // If project not found, show 404
@@ -45,11 +48,11 @@ export default async function ProjectDashboardPage({
   const todos = await db
     .select()
     .from(todo_table)
-    .where(eq(todo_table.parentId, parseInt(id)));
+    .where(eq(todo_table.parentId, projectId));
   const links = await db
     .select()
     .from(link_table)
-    .where(eq(link_table.parentId, parseInt(id)));
+    .where(eq(link_table.parentId, projectId));
 
   // Calculate project-specific stats
   const completedTodos = todos.filter(

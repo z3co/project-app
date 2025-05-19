@@ -26,12 +26,14 @@ export default async function ProjectNotesPage({
   params: { id: string };
 }) {
   const { id } = await params; // eslint-disable-line
+  const projectId = Number.parseInt(id, 10);
+  if (Number.isNaN(projectId)) notFound();
 
   // Find the project by ID
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, parseInt(id)))
+    .where(eq(project_table.id, projectId))
     .limit(1);
 
   // If project not found, show 404
@@ -45,7 +47,7 @@ export default async function ProjectNotesPage({
   const notes = await db
     .select()
     .from(note_table)
-    .where(eq(note_table.parentId, parseInt(id)));
+    .where(eq(note_table.parentId, projectId));
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">

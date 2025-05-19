@@ -26,12 +26,14 @@ export default async function ProjectFilesPage({
   params: { id: string };
 }) {
   const { id } = await params; // eslint-disable-line
+  const projectId = Number.parseInt(id, 10);
+  if (Number.isNaN(projectId)) notFound();
 
   // Find the project by ID
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, parseInt(id)))
+    .where(eq(project_table.id, projectId))
     .limit(1);
 
   // If project not found, show 404
@@ -45,7 +47,7 @@ export default async function ProjectFilesPage({
   const files = await db
     .select()
     .from(file_table)
-    .where(eq(file_table.parentId, parseInt(id)));
+    .where(eq(file_table.parentId, projectId));
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
