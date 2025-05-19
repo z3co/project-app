@@ -26,14 +26,15 @@ export default async function ProjectNotesPage({
   params: { id: string };
 }) {
   const { id } = await params; // eslint-disable-line
-  const projectId = Number.parseInt(id, 10);
-  if (Number.isNaN(projectId)) notFound();
+
+  const numericId = Number.parseInt(id, 10);
+  if (Number.isNaN(numericId)) notFound();
 
   // Find the project by ID
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(eq(project_table.id, numericId))
     .limit(1);
 
   // If project not found, show 404
@@ -43,11 +44,24 @@ export default async function ProjectNotesPage({
 
   const project = projectResponse[0];
 
-  // Get project-specific todos
+  // Get project-specific notes
   const notes = await db
     .select()
     .from(note_table)
-    .where(eq(note_table.parentId, projectId));
+    .where(eq(note_table.parentId, numericId));
+    .from(note_table)
+    .where(eq(note_table.parentId, numericId));
+  const notes = await db
+    .select()
+    .from(note_table)
+    .where(eq(note_table.parentId, numericId));
+  return (
+    .from(note_table)
+    .where(eq(note_table.parentId, numericId));
+  
+  return (
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+    .where(eq(note_table.parentId, numericId));
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">

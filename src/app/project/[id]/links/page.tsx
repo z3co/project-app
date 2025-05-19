@@ -26,14 +26,14 @@ export default async function ProjectLinksPage({
   params: { id: string };
 }) {
   const { id } = await params; // eslint-disable-line
-  const projectId = Number.parseInt(id, 10);
-  if (Number.isNaN(projectId)) notFound();
+  const numericId = Number.parseInt(id, 10);
+  if (Number.isNaN(numericId)) notFound();
 
   // Find the project by ID
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(eq(project_table.id, numericId))
     .limit(1);
 
   // If project not found, show 404
@@ -47,7 +47,18 @@ export default async function ProjectLinksPage({
   const links = await db
     .select()
     .from(link_table)
-    .where(eq(link_table.parentId, projectId));
+    .where(eq(link_table.parentId, numericId));
+
+  return (
+    .where(eq(link_table.parentId, numericId));
+    .from(link_table)
+    .where(eq(link_table.parentId, numericId));
+  const links = await db
+    .select()
+    .from(link_table)
+    .where(eq(link_table.parentId, numericId));
+    .from(link_table)
+    .where(eq(link_table.parentId, parseInt(id)));
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

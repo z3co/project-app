@@ -20,7 +20,6 @@ import { notFound } from "next/navigation";
 import { db } from "~/server/db";
 import { link_table, project_table, todo_table } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
-
 export default async function ProjectDashboardPage({
   params,
 }: {
@@ -28,14 +27,13 @@ export default async function ProjectDashboardPage({
 }) {
 
   const { id } = await params; // eslint-disable-line
-  const projectId = Number.parseInt(id, 10);
-  if (Number.isNaN(projectId)) notFound();
-
+  const numericId = Number.parseInt(id, 10);
+  if (Number.isNaN(numericId)) notFound();
 
   const projectFromDb = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(eq(project_table.id, numericId))
     .limit(1);
 
   // If project not found, show 404
@@ -48,17 +46,19 @@ export default async function ProjectDashboardPage({
   const todos = await db
     .select()
     .from(todo_table)
-    .where(eq(todo_table.parentId, projectId));
+    .where(eq(todo_table.parentId, numericId));
   const links = await db
     .select()
     .from(link_table)
-    .where(eq(link_table.parentId, projectId));
+    .where(eq(link_table.parentId, numericId));
 
   // Calculate project-specific stats
   const completedTodos = todos.filter(
     (todo) => todo.status === "completed",
   ).length;
   const inProgressTodos = todos.filter(
+    (todo) => todo.status === "in-progress",
+  ).length;
     (todo) => todo.status === "in-progress",
   ).length;
   const pendingTodos = todos.filter((todo) => todo.status === "pending").length;

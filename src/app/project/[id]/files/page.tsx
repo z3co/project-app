@@ -26,14 +26,14 @@ export default async function ProjectFilesPage({
   params: { id: string };
 }) {
   const { id } = await params; // eslint-disable-line
-  const projectId = Number.parseInt(id, 10);
-  if (Number.isNaN(projectId)) notFound();
+  const numericId = Number.parseInt(id, 10);
+  if (Number.isNaN(numericId)) notFound();
 
   // Find the project by ID
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(eq(project_table.id, numericId))
     .limit(1);
 
   // If project not found, show 404
@@ -47,7 +47,60 @@ export default async function ProjectFilesPage({
   const files = await db
     .select()
     .from(file_table)
-    .where(eq(file_table.parentId, projectId));
+    .where(eq(file_table.parentId, numericId));
+
+  return (
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Download, MoreHorizontal, Upload } from "lucide-react";
+import { notFound } from "next/navigation";
+import { db } from "~/server/db";
+import { project_table, file_table } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
+
+export default async function ProjectFilesPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { id } = await params; // eslint-disable-line
+  const numericId = Number.parseInt(id, 10);
+  if (Number.isNaN(numericId)) notFound();
+
+  // Find the project by ID
+  const projectResponse = await db
+    .select()
+    .from(project_table)
+    .where(eq(project_table.id, numericId))
+    .limit(1);
+
+  // If project not found, show 404
+  if (!projectResponse[0]) {
+    notFound();
+  }
+
+  const project = projectResponse[0];
+
+  // Get project-specific todos
+  const files = await db
+    .select()
+    .from(file_table)
+    .where(eq(file_table.parentId, numericId));
+    .from(file_table)
+    .where(eq(file_table.parentId, numericId));
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

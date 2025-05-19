@@ -28,14 +28,14 @@ export default async function ProjectTodosPage({
   params: { id: string };
 }) {
   const { id } = await params; // eslint-disable-line
-  const projectId = Number.parseInt(id, 10);
-  if (Number.isNaN(projectId)) notFound();
+  const numericId = Number.parseInt(id, 10);
+  if (Number.isNaN(numericId)) notFound();
 
   // Find the project by ID
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(eq(project_table.id, numericId))
     .limit(1);
 
   // If project not found, show 404
@@ -49,7 +49,17 @@ export default async function ProjectTodosPage({
   const todos = await db
     .select()
     .from(todo_table)
-    .where(eq(todo_table.parentId, projectId));
+    .where(eq(todo_table.parentId, numericId));
+
+  return (
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
+      <div className="flex items-center justify-between space-y-2">
+        <div>
+    .where(eq(todo_table.parentId, numericId));
+  const todos = await db
+    .select()
+    .from(todo_table)
+    .where(eq(todo_table.parentId, parseInt(id)));
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
