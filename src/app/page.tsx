@@ -65,9 +65,9 @@ export default async function ProjectsPage() {
   const planningProjects = projects.filter(
     (p) => p.status === "Planning",
   ).length;
- // const highPriorityProjects = projects.filter(
- //   (p) => p.status !== "Completed",
- // ).length;
+  // const highPriorityProjects = projects.filter(
+  //   (p) => p.status !== "Completed",
+  // ).length;
 
   return (
     <div className="flex min-h-screen flex-col">
