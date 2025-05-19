@@ -1,32 +1,62 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { projectLinks, projects } from "~/lib/mock-data"
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { ExternalLink, LinkIcon, MoreHorizontal, Plus } from "lucide-react"
-import { Badge } from "~/components/ui/badge"
-import { notFound } from "next/navigation"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { ExternalLink, LinkIcon, MoreHorizontal, Plus } from "lucide-react";
+import { notFound } from "next/navigation";
+import { project_table, link_table } from "~/server/db/schema";
+import { db } from "~/server/db";
+import { eq } from "drizzle-orm";
 
-export default async function ProjectLinksPage({ params }: { params: { id: string } }) {
-  const projectId = (await params).id
+export default async function ProjectLinksPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { id } = await params; // eslint-disable-line
+  const projectId = Number.parseInt(id, 10);
+  if (Number.isNaN(projectId)) notFound();
 
   // Find the project by ID
-  const project = projects.find((p) => p.id === projectId)
+  const projectResponse = await db
+    .select()
+    .from(project_table)
+    .where(eq(project_table.id, projectId))
+    .limit(1);
 
   // If project not found, show 404
-  if (!project) {
-    notFound()
+  if (!projectResponse[0]) {
+    notFound();
   }
 
-  // Get project-specific links
-  const links = projectLinks[projectId] || []
+  const project = projectResponse[0];
+
+  // Get project-specific todos
+  const links = await db
+    .select()
+    .from(link_table)
+    .where(eq(link_table.parentId, projectId));
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Links</h2>
-          <p className="text-muted-foreground">Manage links for {project.name}</p>
+          <p className="text-muted-foreground">
+            Manage links for {project.name}
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button>
@@ -61,17 +91,16 @@ export default async function ProjectLinksPage({ params }: { params: { id: strin
         <CardContent>
           <div className="space-y-4">
             {links.map((link) => (
-              <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div
+                key={link.id}
+                className="flex items-center justify-between rounded-lg border p-4"
+              >
                 <div className="flex items-center gap-4">
                   <LinkIcon className="h-5 w-5 text-blue-500" />
                   <div>
                     <p className="font-medium">{link.title}</p>
-                    <p className="text-sm text-muted-foreground">{link.url}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge>{link.category}</Badge>
-                      <span className="text-xs text-muted-foreground">Added: {link.createdAt}</span>
-                      <span className="text-xs text-muted-foreground">By: {link.createdBy}</span>
-                    </div>
+                    <p className="text-muted-foreground text-sm">{link.url}</p>
+                    <div className="mt-1 flex items-center gap-2"></div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -89,5 +118,5 @@ export default async function ProjectLinksPage({ params }: { params: { id: strin
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

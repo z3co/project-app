@@ -1,29 +1,29 @@
-# Create T3 App
+# TODO
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+- [x] Connect database to frontend
+- [ ] Creating editing and deleting todos, links and notes
+- [x] Fixing linting and type errors on the dashboard
+- [ ] Creating projects
+- [ ] Setup project completion levels
+- [ ] Adding auth
+- [ ] Adding groups
+- [ ] Uploading files
+- [ ] Searching
+- [ ] Fixing cards, completion percentages and consider refactoring commented out code or removing it
+- [ ] Proper home page
+- [ ] Onboarding new users
+- [ ] Proper scaling and error handling
+- [ ] Consider making endDate optional for projects
 
-## What's next? How do I make an app with this?
+## 19/05/2025
+Connected db to frontend, finaly getting rid of Linting and type errors. Next up are Creating, editing and deleting projects and project items, such as links, notes, todos etc.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- [ ] Creating projects
+- [ ] Editing projects
+- [ ] Deleting projects
+- [ ] Creating project items
+- [ ] Editing project items
+- [ ] Deleting project items
+- [ ] Calculating and displaying completion percentages
+- [ ] Figuring out highpriority projects
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
-
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
-
-## Learn More
-
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
-
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
