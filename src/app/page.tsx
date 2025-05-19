@@ -24,8 +24,23 @@ import { db } from "~/server/db";
 import { project_table } from "~/server/db/schema";
 
 export default async function ProjectsPage() {
-  const projects = await db.select().from(project_table);
+  let projects: typeof project_table.$inferSelect[] = [];
+  try {
+    projects = await db
+      .select({
+        id: project_table.id,
+        name: project_table.name,
+        description: project_table.description,
+        status: project_table.status,
+      })
+      .from(project_table);
+  } catch (err) {
+    console.error("DB error while fetching projects", err);
+    // You could show a fallback UI, rethrow, or return early here
+  }
 
+  // …rest of your component rendering using `projects`
+}
   /* Former project schema
    *   {
       id: "1",
