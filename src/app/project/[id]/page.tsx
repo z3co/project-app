@@ -87,7 +87,7 @@ export default async function ProjectDashboardPage({
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">
-            {project?.description}
+            {project?.name}
           </h2>
           <p className="text-muted-foreground">{project?.description}</p>
         </div>
