@@ -17,16 +17,19 @@ import {
 import { CheckCircle, Circle, Clock, MoreHorizontal, Plus } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "~/server/db";
 import { project_table, todo_table } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function ProjectTodosPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const user = await auth();
+  if (!user.userId) redirect("/");
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
@@ -35,7 +38,12 @@ export default async function ProjectTodosPage({
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(
+      and(
+        eq(project_table.id, projectId),
+        eq(project_table.ownerId, user.userId),
+      ),
+    )
     .limit(1);
 
   // If project not found, show 404
@@ -49,7 +57,12 @@ export default async function ProjectTodosPage({
   const todos = await db
     .select()
     .from(todo_table)
-    .where(eq(todo_table.parentId, projectId));
+    .where(
+      and(
+        eq(todo_table.parentId, projectId),
+        eq(todo_table.ownerId, user.userId),
+      ),
+    );
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
