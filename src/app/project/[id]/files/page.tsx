@@ -15,16 +15,19 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Download, MoreHorizontal, Upload } from "lucide-react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "~/server/db";
 import { project_table, file_table } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function ProjectFilesPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const user = await auth();
+  if (!user.userId) redirect("/");
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
@@ -33,7 +36,12 @@ export default async function ProjectFilesPage({
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(
+      and(
+        eq(project_table.id, projectId),
+        eq(project_table.ownerId, user.userId),
+      ),
+    )
     .limit(1);
 
   // If project not found, show 404
@@ -47,7 +55,12 @@ export default async function ProjectFilesPage({
   const files = await db
     .select()
     .from(file_table)
-    .where(eq(file_table.parentId, projectId));
+    .where(
+      and(
+        eq(file_table.parentId, projectId),
+        eq(file_table.ownerId, user.userId),
+      ),
+    );
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

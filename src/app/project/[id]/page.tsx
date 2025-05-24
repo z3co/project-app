@@ -16,26 +16,33 @@ import {
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "~/server/db";
 import { link_table, project_table, todo_table } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function ProjectDashboardPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const user = await auth();
+  if (!user.userId) redirect("/");
 
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
 
-
   const projectFromDb = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(
+      and(
+        eq(project_table.id, projectId),
+        eq(project_table.ownerId, user.userId),
+      ),
+    )
     .limit(1);
 
   // If project not found, show 404
@@ -48,11 +55,21 @@ export default async function ProjectDashboardPage({
   const todos = await db
     .select()
     .from(todo_table)
-    .where(eq(todo_table.parentId, projectId));
+    .where(
+      and(
+        eq(todo_table.parentId, projectId),
+        eq(todo_table.ownerId, user.userId),
+      ),
+    );
   const links = await db
     .select()
     .from(link_table)
-    .where(eq(link_table.parentId, projectId));
+    .where(
+      and(
+        eq(link_table.parentId, projectId),
+        eq(link_table.ownerId, user.userId),
+      ),
+    );
 
   // Calculate project-specific stats
   const completedTodos = todos.filter(

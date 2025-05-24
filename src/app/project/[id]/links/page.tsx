@@ -15,16 +15,19 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { ExternalLink, LinkIcon, MoreHorizontal, Plus } from "lucide-react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { project_table, link_table } from "~/server/db/schema";
 import { db } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function ProjectLinksPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const user = await auth();
+  if (!user.userId) redirect("/");
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
@@ -33,7 +36,12 @@ export default async function ProjectLinksPage({
   const projectResponse = await db
     .select()
     .from(project_table)
-    .where(eq(project_table.id, projectId))
+    .where(
+      and(
+        eq(project_table.id, projectId),
+        eq(project_table.ownerId, user.userId),
+      ),
+    )
     .limit(1);
 
   // If project not found, show 404
@@ -47,7 +55,12 @@ export default async function ProjectLinksPage({
   const links = await db
     .select()
     .from(link_table)
-    .where(eq(link_table.parentId, projectId));
+    .where(
+      and(
+        eq(link_table.parentId, projectId),
+        eq(link_table.ownerId, user.userId),
+      ),
+    );
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
