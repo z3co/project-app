@@ -25,7 +25,7 @@ export default function CreateProjectComponent() {
       <div className="bg-background/95 supports-[backdrop-filter]:bg-background/60 rounded-md p-4 md:p-6">
         {/* Project Name */}
         <div className="mb-4">
-          <label htmlFor="title" className="mb-2 block text-sm font-medium">
+          <label htmlFor="name" className="mb-2 block text-sm font-medium">
             Name of project
           </label>
           <div className="relative mt-2 rounded-md">
@@ -62,7 +62,7 @@ export default function CreateProjectComponent() {
         </div>
         {/* Project End date */}
         <div className="mb-4">
-          <label htmlFor="end-date" className="mb-2 block text-sm font-medium">
+          <label htmlFor="endDate" className="mb-2 block text-sm font-medium">
             End of the project
           </label>
           <div className="relative mt-2 rounded-md">
