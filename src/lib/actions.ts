@@ -9,11 +9,17 @@ import { redirect } from "next/navigation";
 
 const ProjectSchema = z.object({
   id: z.number(),
-  name: z.string(),
-  description: z.string(),
+  name: z.string({
+    invalid_type_error: "Please name your project.",
+  }).nonempty(),
+  description: z.string({
+    invalid_type_error: "Please enter a description for your project",
+  }).nonempty(),
   status: z.enum(["Planning", "In Progress", "Completed"]),
-  createdAt: z.date(),
-  endDate: z.string(),
+  createdAt: z.string().datetime(),
+  endDate: z.string().datetime({
+    message: "Please select a date for your project",
+  }),
   ownerId: z.string(),
 });
 
@@ -24,35 +30,56 @@ const CreateProject = ProjectSchema.omit({
   ownerId: true,
 });
 
-export async function createProject(formData: FormData) {
-  try {
-    const user = await auth();
+export type State = {
+  errors?: {
+    name?: string[];
+    description?: string[];
+    endDate?: string[];
+  };
+  message?: string | null;
+};
 
-    if (!user.userId) throw new Error("User not authorized");
+export async function createProject(prevState: State, formData: FormData) {
+  const user = await auth();
 
-    const { name, description, endDate } = CreateProject.parse({
-      name: formData.get("name"),
-      description: formData.get("description"),
-      endDate: formData.get("endDate"),
-    });
+  if (!user.userId) return { status: "401", message: "User not authorized" };
 
-    const newProject: typeof project_table.$inferInsert = {
-      name: name,
-      description: description,
-      endDate: new Date(endDate),
-      ownerId: user.userId,
-      status: "Planning",
+  console.log(prevState);
+
+  const validatedFields = CreateProject.safeParse({
+    name: formData.get("name"),
+    description: formData.get("description"),
+    endDate: formData.get("endDate"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Missing fields, Failed to create project",
     };
+  }
 
-    const returningId = await db
+  const { name, description, endDate } = validatedFields.data;
+  const newProject: typeof project_table.$inferInsert = {
+    name: name,
+    description: description,
+    endDate: new Date(endDate),
+    ownerId: user.userId,
+    status: "Planning",
+  };
+  let returningId;
+  try {
+    returningId = await db
       .insert(project_table)
       .values(newProject)
       .$returningId();
     if (!returningId[0]) throw new Error("Failed to insert new project");
-    revalidatePath("/");
   } catch (error) {
     console.error(error);
-  } finally {
-    redirect("/");
+    return {
+      message: "A server error occured while creating new project",
+    };
   }
+  revalidatePath("/");
+  redirect(`/project/${returningId[0].id}`);
 }
