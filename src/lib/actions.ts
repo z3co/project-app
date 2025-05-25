@@ -52,7 +52,6 @@ export async function createProject(formData: FormData) {
     revalidatePath("/");
   } catch (error) {
     console.error(error);
-    throw new Error(`Error while creating new todo: ${error}`)
   } finally {
     redirect("/");
   }

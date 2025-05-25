@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { MainNav } from "~/components/main-nav";
-import { UserNav } from "~/components/user-nav";
 import { Search } from "~/components/search";
 import { ModeToggle } from "~/components/mode-toggle";
 import { db } from "~/server/db";

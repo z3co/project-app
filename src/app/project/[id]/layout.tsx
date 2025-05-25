@@ -1,6 +1,5 @@
 import type React from "react";
 import { MainNav } from "~/components/project-nav";
-import { UserNav } from "~/components/user-nav";
 import { Search } from "~/components/search";
 import { ModeToggle } from "~/components/mode-toggle";
 import { Suspense } from "react";
