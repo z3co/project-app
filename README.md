@@ -15,6 +15,7 @@
 - [ ] Onboarding new users
 - [ ] Proper scaling and error handling
 - [ ] Consider making endDate optional for projects
+- [ ] Fixing search
 
 ## 19/05/2025
 Connected db to frontend, finaly getting rid of Linting and type errors. Next up are Creating, editing and deleting projects and project items, such as links, notes, todos etc.
