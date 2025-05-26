@@ -77,7 +77,7 @@ export async function createProject(prevState: State, formData: FormData) {
   } catch (error) {
     console.error(error);
     return {
-      message: "A server error occured while creating new project",
+      message: "A server error occurred while creating new project",
     };
   }
   revalidatePath("/");
