@@ -95,15 +95,12 @@ export default async function ProjectsPage() {
                 Manage and track all your projects in one place
               </p>
             </div>
-            <form action={async () => {
-              "use server";
-              redirect("/project/new")
-            }}>
-            <Button type="submit">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              New Project
+            <Button asChild>
+              <Link href="/project/new">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                New Project
+              </Link>
             </Button>
-            </form>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
