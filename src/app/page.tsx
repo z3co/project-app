@@ -72,9 +72,9 @@ export default async function ProjectsPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b backdrop-blur">
-        <div className="container flex h-16 items-end justify-between py-4">
+        <div className="container flex h-16 items-center justify-between py-4">
           <MainNav />
-          <div className="flex items-end gap-4">
+          <div className="flex items-center justify-end gap-4">
             <Search />
             <ModeToggle />
             <SignedIn>
