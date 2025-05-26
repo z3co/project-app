@@ -71,7 +71,7 @@ export default function CreateProjectComponent() {
                     className="h-11"
                   />
                 </div>
-                <div id="customer-error" aria-live="polite" aria-atomic="true">
+                <div id="name-error" aria-live="polite" aria-atomic="true">
                   {state.errors?.name?.map((error: string) => (
                     <p className="mt-2 text-sm text-red-500" key={error}>
                       {error}
@@ -95,7 +95,7 @@ export default function CreateProjectComponent() {
                     className="h-11"
                   />
                 </div>
-                <div id="customer-error" aria-live="polite" aria-atomic="true">
+                <div id="description-error" aria-live="polite" aria-atomic="true">
                   {state.errors?.description?.map((error: string) => (
                     <p className="mt-2 text-sm text-red-500" key={error}>
                       {error}
@@ -111,9 +111,9 @@ export default function CreateProjectComponent() {
                   End of the project
                 </Label>
                 <div className="relative">
-                  <DatePicker />
+                  <DatePicker id="endDate"/>
                 </div>
-                <div id="customer-error" aria-live="polite" aria-atomic="true">
+                <div id="endDate-error" aria-live="polite" aria-atomic="true">
                   {state.errors?.endDate?.map((error: string) => (
                     <p className="mt-2 text-sm text-red-500" key={error}>
                       {error}
