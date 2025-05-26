@@ -15,7 +15,7 @@ import {
   CardContent,
   CardDescription,
 } from "./ui/card";
-import { Label } from "@radix-ui/react-dropdown-menu";
+import { Label } from "~/components/ui/label";
 import { FileText, CalendarDays, FolderPlus } from "lucide-react";
 import { useActionState } from "react";
 
@@ -58,7 +58,7 @@ export default function CreateProjectComponent() {
             <CardContent className="space-y-6">
               {/* Project Name */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium">
+                <Label htmlFor="name" className="flex items-center gap-2 text-sm font-medium">
                   <FileText className="h-4 w-4" />
                   Name of project
                 </Label>
@@ -82,7 +82,7 @@ export default function CreateProjectComponent() {
 
               {/* Project Description */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium">
+                <Label htmlFor="description" className="flex items-center gap-2 text-sm font-medium">
                   <FileText className="h-4 w-4" />
                   Description
                 </Label>
@@ -106,7 +106,7 @@ export default function CreateProjectComponent() {
 
               {/* Project End Date */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-sm font-medium">
+                <Label htmlFor="endDate" className="flex items-center gap-2 text-sm font-medium">
                   <CalendarDays className="h-4 w-4" />
                   End of the project
                 </Label>
