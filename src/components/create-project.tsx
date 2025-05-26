@@ -131,6 +131,11 @@ export default function CreateProjectComponent() {
                   Submit
                 </Button>
               </div>
+              <div aria-live="polite" aria-atomic="true">
+                <p className="mt-2 text-sm text-red-500" key={state.message}>
+                  {state?.message}
+                </p>
+              </div>
             </CardContent>
           </Card>
 
