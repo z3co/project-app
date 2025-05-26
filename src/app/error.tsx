@@ -7,7 +7,7 @@ import { AlertTriangle, RefreshCw, Home, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 export default function Error({
-  error,
+  error: errorInfo,
   reset,
 }: {
   error: Error & { digest?: string }
@@ -15,8 +15,8 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error("Application error:", error)
-  }, [error])
+    console.error("Application error:", errorInfo)
+  }, [errorInfo])
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -51,9 +51,9 @@ export default function Error({
               {process.env.NODE_ENV === "development" && (
                 <div className="rounded-md bg-muted p-3">
                   <p className="text-sm font-medium text-muted-foreground mb-1">Error Details:</p>
-                  <p className="text-xs font-mono text-destructive break-all">{error.message}</p>
-                  {error.digest && (
-                    <p className="text-xs font-mono text-muted-foreground mt-1">Digest: {error.digest}</p>
+                  <p className="text-xs font-mono text-destructive break-all">{errorInfo.message}</p>
+                  {errorInfo.digest && (
+                    <p className="text-xs font-mono text-muted-foreground mt-1">Digest: {errorInfo.digest}</p>
                   )}
                 </div>
               )}
