@@ -27,8 +27,9 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export default async function ProjectsPage() {
-  const user = await auth();
-  if (!user.userId) return (<SignInButton />)
+  const { userId } = await auth();
+  if (!userId) return (<SignInButton />) // Temporary until real sign in page is made
+
   // Implement theos trycatch github gist
   const projects = await db
     .select({
@@ -37,22 +38,7 @@ export default async function ProjectsPage() {
       description: project_table.description,
       status: project_table.status,
     })
-    .from(project_table).where(eq(project_table.ownerId, user.userId));
-
-  // …rest of your component rendering using `projects`
-
-  /* Former project schema
- *   {
-    id: "1",
-    name: "Website Redesign",
-    description: "Redesign the company website",
-    status: "In Progress",
-    completionPercentage: 65,
-    dueDate: "2025-05-15",
-    priority: "High",
-    team: ["John Doe", "Jane Smith", "Alex Johnson"],
-  },
-  **/
+    .from(project_table).where(eq(project_table.ownerId, userId));
 
   // Calculate project statistics
   const totalProjects = projects.length;
