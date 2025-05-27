@@ -80,7 +80,7 @@ export default async function ProjectDashboardPage({
     throw new Error("Error while getting links");
   }
 
-  const links = todosResult.data;
+  const links = linksResult.data;
 
   // Calculate project-specific stats
   const completedTodos = todos.filter(
