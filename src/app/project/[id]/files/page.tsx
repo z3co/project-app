@@ -16,33 +16,34 @@ import {
 } from "~/components/ui/select";
 import { Download, MoreHorizontal, Upload } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
-import { db } from "~/server/db";
-import { project_table, file_table } from "~/server/db/schema";
-import { and, eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
+import { tryCatch } from "~/lib/utils";
+import { QUERIES } from "~/server/db/queries";
 
 export default async function ProjectFilesPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const user = await auth();
-  if (!user.userId) redirect("/");
+  const { userId } = await auth();
+  if (!userId) redirect("/");
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
 
   // Find the project by ID
-  const projectResponse = await db
-    .select()
-    .from(project_table)
-    .where(
-      and(
-        eq(project_table.id, projectId),
-        eq(project_table.ownerId, user.userId),
-      ),
-    )
-    .limit(1);
+  const result = await tryCatch(
+    QUERIES.getProjectById({
+      userId,
+      projectId,
+    }),
+  );
+
+  if (result.error) {
+    console.error("Error while getting project", result.error);
+    throw new Error("Error while getting projects");
+  }
+  const projectResponse = result.data;
 
   // If project not found, show 404
   if (!projectResponse[0]) {
@@ -52,15 +53,18 @@ export default async function ProjectFilesPage({
   const project = projectResponse[0];
 
   // Get project-specific todos
-  const files = await db
-    .select()
-    .from(file_table)
-    .where(
-      and(
-        eq(file_table.parentId, projectId),
-        eq(file_table.ownerId, user.userId),
-      ),
-    );
+  const filesResult = await tryCatch(
+    QUERIES.getFilesByParent({
+      userId,
+      parentId: projectId,
+    }),
+  );
+  if (filesResult.error) {
+    console.error("Failed to get files from db", filesResult.error);
+    throw new Error("Failed to get files from db");
+  }
+
+  const files = filesResult.data;
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

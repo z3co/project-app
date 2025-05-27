@@ -16,33 +16,34 @@ import {
 } from "~/components/ui/select";
 import { Edit, MoreHorizontal, Plus } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
-import { db } from "~/server/db";
-import { note_table, project_table } from "~/server/db/schema";
-import { and, eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
+import { tryCatch } from "~/lib/utils";
+import { QUERIES } from "~/server/db/queries";
 
 export default async function ProjectNotesPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const user = await auth();
-  if (!user.userId) redirect("/");
+  const { userId } = await auth();
+  if (!userId) redirect("/");
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
 
   // Find the project by ID
-  const projectResponse = await db
-    .select()
-    .from(project_table)
-    .where(
-      and(
-        eq(project_table.id, projectId),
-        eq(project_table.ownerId, user.userId),
-      ),
-    )
-    .limit(1);
+  const result = await tryCatch(
+    QUERIES.getProjectById({
+      userId,
+      projectId,
+    }),
+  );
+  if (result.error) {
+    console.log("Error while getting projects", result.error);
+    throw new Error("Error while getting projects");
+  }
+
+  const projectResponse = result.data;
 
   // If project not found, show 404
   if (!projectResponse[0]) {
@@ -51,16 +52,20 @@ export default async function ProjectNotesPage({
 
   const project = projectResponse[0];
 
-  // Get project-specific todos
-  const notes = await db
-    .select()
-    .from(note_table)
-    .where(
-      and(
-        eq(note_table.parentId, projectId),
-        eq(note_table.ownerId, user.userId),
-      ),
-    );
+  // Get project-specific notes
+  const notesResult = await tryCatch(
+    QUERIES.getNotesByParents({
+      userId,
+      parentId: projectId,
+    }),
+  );
+  if (notesResult.error) {
+    console.error("Error while getting links from db", notesResult.error);
+    throw new Error("Error while getting links");
+  }
+
+  const notes = notesResult.data;
+
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">

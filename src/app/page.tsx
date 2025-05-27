@@ -16,7 +16,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
-import { MainNav } from "~/components/main-nav";
 import { Search } from "~/components/search";
 import { ModeToggle } from "~/components/mode-toggle";
 import { db } from "~/server/db";
@@ -24,21 +23,20 @@ import { project_table } from "~/server/db/schema";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+import { tryCatch } from "~/lib/utils";
+import { QUERIES } from "~/server/db/queries";
 
 export default async function ProjectsPage() {
   const { userId } = await auth();
   if (!userId) return (<SignInButton />) // Temporary until real sign in page is made
 
-  // Implement theos trycatch github gist
-  const projects = await db
-    .select({
-      id: project_table.id,
-      name: project_table.name,
-      description: project_table.description,
-      status: project_table.status,
-    })
-    .from(project_table).where(eq(project_table.ownerId, userId));
+  const result = await tryCatch(QUERIES.getProjectByUser(userId))
+  if (result.error) {
+    console.error("Failed to get projects", result.error)
+    throw new Error("Failed to get projects");
+  }
+
+  const projects = result.data;
 
   // Calculate project statistics
   const totalProjects = projects.length;
