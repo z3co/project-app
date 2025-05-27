@@ -54,14 +54,14 @@ export default async function ProjectNotesPage({
 
   // Get project-specific notes
   const notesResult = await tryCatch(
-    QUERIES.getNotesByParents({
+    QUERIES.getNotesByParent({
       userId,
       parentId: projectId,
     }),
   );
   if (notesResult.error) {
-    console.error("Error while getting links from db", notesResult.error);
-    throw new Error("Error while getting links");
+    console.error("Error while getting notes from db", notesResult.error);
+    throw new Error("Error while getting notes");
   }
 
   const notes = notesResult.data;

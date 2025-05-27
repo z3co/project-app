@@ -58,7 +58,7 @@ export const QUERIES = {
         ),
       );
   },
-  getNotesByParents: async function(input: {
+  getNotesByParent: async function(input: {
     userId: string;
     parentId: number;
   }) {
@@ -72,7 +72,7 @@ export const QUERIES = {
         ),
       );
   },
-  getTodosByParents: async function(input: {
+  getTodosByParent: async function(input: {
     userId: string;
     parentId: number;
   }) {
@@ -89,7 +89,7 @@ export const QUERIES = {
 };
 
 export const MUTATIONS = {
-  createProject: async function(project: typeof project_table.$inferInsert) {
+  createProject: async function(project: Omit<typeof project_table.$inferInsert, "id">) {
     return await db.insert(project_table).values(project).$returningId();
   },
 };

@@ -56,7 +56,7 @@ export default async function ProjectTodosPage({
 
   // Get project-specific todos
   const todosResult = await tryCatch(
-    QUERIES.getTodosByParents({
+    QUERIES.getTodosByParent({
       userId,
       parentId: projectId,
     }),
