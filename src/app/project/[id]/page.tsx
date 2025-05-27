@@ -21,55 +21,66 @@ import { db } from "~/server/db";
 import { link_table, project_table, todo_table } from "~/server/db/schema";
 import { and, eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
+import { tryCatch } from "~/lib/utils";
+import { QUERIES } from "~/server/db/queries";
 
 export default async function ProjectDashboardPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const user = await auth();
-  if (!user.userId) redirect("/");
+  const { userId } = await auth();
+  if (!userId) redirect("/");
 
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
 
-  const projectFromDb = await db
-    .select()
-    .from(project_table)
-    .where(
-      and(
-        eq(project_table.id, projectId),
-        eq(project_table.ownerId, user.userId),
-      ),
-    )
-    .limit(1);
+  const result = await tryCatch(
+    QUERIES.getProjectById({
+      userId,
+      projectId,
+    }),
+  );
+  if (result.error) {
+    console.error("Error while getting project", result.error);
+    throw new Error("Error while getting project");
+  }
+
+  const projectResponse = result.data;
 
   // If project not found, show 404
-  if (!projectFromDb[0]) {
+  if (!projectResponse[0]) {
     notFound();
   }
-  const project = projectFromDb[0];
+  const project = projectResponse[0];
 
   // Get project-specific data
-  const todos = await db
-    .select()
-    .from(todo_table)
-    .where(
-      and(
-        eq(todo_table.parentId, projectId),
-        eq(todo_table.ownerId, user.userId),
-      ),
-    );
-  const links = await db
-    .select()
-    .from(link_table)
-    .where(
-      and(
-        eq(link_table.parentId, projectId),
-        eq(link_table.ownerId, user.userId),
-      ),
-    );
+  const todosResult = await tryCatch(
+    QUERIES.getTodosByParent({
+      userId,
+      parentId: projectId,
+    }),
+  );
+  if (todosResult.error) {
+    console.error("Error while getting todos from db", todosResult.error);
+    throw new Error("Error while getting todos");
+  }
+
+  const todos = todosResult.data;
+
+  const linksResult = await tryCatch(
+    QUERIES.getLinksByParent({
+      userId,
+      parentId: projectId,
+    }),
+  );
+  if (linksResult.error) {
+    console.error("Error while getting links from db", linksResult.error);
+    throw new Error("Error while getting links");
+  }
+
+  const links = todosResult.data;
 
   // Calculate project-specific stats
   const completedTodos = todos.filter(

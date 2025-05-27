@@ -41,8 +41,8 @@ export default async function ProjectTodosPage({
     }),
   );
   if (result.error) {
-    console.log("Error while getting projects", result.error);
-    throw new Error("Error while getting projects");
+    console.error("Error while getting project", result.error);
+    throw new Error("Error while getting project");
   }
 
   const projectResponse = result.data;
@@ -62,8 +62,8 @@ export default async function ProjectTodosPage({
     }),
   );
   if (todosResult.error) {
-    console.error("Error while getting links from db", todosResult.error);
-    throw new Error("Error while getting links");
+    console.error("Error while getting todos from db", todosResult.error);
+    throw new Error("Error while getting todos");
   }
 
   const todos = todosResult.data;

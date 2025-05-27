@@ -41,7 +41,7 @@ export default async function ProjectLinksPage({
 
   if (result.error) {
     console.error("Error while getting project", result.error);
-    throw new Error("Error while getting projects");
+    throw new Error("Error while getting project");
   }
   const projectResponse = result.data;
   // If project not found, show 404

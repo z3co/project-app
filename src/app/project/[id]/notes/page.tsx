@@ -39,8 +39,8 @@ export default async function ProjectNotesPage({
     }),
   );
   if (result.error) {
-    console.log("Error while getting projects", result.error);
-    throw new Error("Error while getting projects");
+    console.error("Error while getting project", result.error);
+    throw new Error("Error while getting project");
   }
 
   const projectResponse = result.data;
