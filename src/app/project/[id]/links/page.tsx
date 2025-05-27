@@ -15,27 +15,35 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { ExternalLink, LinkIcon, MoreHorizontal, Plus } from "lucide-react";
-import { notFound } from "next/navigation";
-import { project_table, link_table } from "~/server/db/schema";
-import { db } from "~/server/db";
-import { eq } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { tryCatch } from "~/lib/utils";
+import { QUERIES } from "~/server/db/queries";
 
 export default async function ProjectLinksPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const { userId } = await auth();
+  if (!userId) redirect("/");
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
 
   // Find the project by ID
-  const projectResponse = await db
-    .select()
-    .from(project_table)
-    .where(eq(project_table.id, projectId))
-    .limit(1);
+  const result = await tryCatch(
+    QUERIES.getProjectById({
+      userId,
+      projectId,
+    }),
+  );
 
+  if (result.error) {
+    console.error("Error while getting project", result.error);
+    throw new Error("Error while getting project");
+  }
+  const projectResponse = result.data;
   // If project not found, show 404
   if (!projectResponse[0]) {
     notFound();
@@ -44,10 +52,18 @@ export default async function ProjectLinksPage({
   const project = projectResponse[0];
 
   // Get project-specific todos
-  const links = await db
-    .select()
-    .from(link_table)
-    .where(eq(link_table.parentId, projectId));
+  const linksResult = await tryCatch(
+    QUERIES.getLinksByParent({
+      userId,
+      parentId: projectId,
+    }),
+  );
+  if (linksResult.error) {
+    console.error("Error while getting links from db", linksResult.error);
+    throw new Error("Error while getting links");
+  }
+
+  const links = linksResult.data;
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

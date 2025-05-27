@@ -1,24 +1,24 @@
-import type React from "react"
-import { MainNav } from "~/components/project-nav"
-import { UserNav } from "~/components/user-nav"
-import { Search } from "~/components/search"
-import { ModeToggle } from "~/components/mode-toggle"
-import { Suspense } from "react"
-import Link from "next/link"
-import { Button } from "~/components/ui/button"
-import { ChevronLeft } from "lucide-react"
+import type React from "react";
+import { MainNav } from "~/components/project-nav";
+import { Search } from "~/components/search";
+import { ModeToggle } from "~/components/mode-toggle";
+import { Suspense } from "react";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 export default async function ProjectLayout({
   children,
   params,
 }: {
-  children: React.ReactNode
-  params: { id: string }
+  children: React.ReactNode;
+  params: { id: string };
 }) {
-  const { id } = await params // eslint-disable-line
+  const { id } = await params; // eslint-disable-line
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b backdrop-blur">
         <div className="container flex h-16 items-center justify-between py-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" asChild>
@@ -32,7 +32,12 @@ export default async function ProjectLayout({
           <div className="flex items-center gap-4">
             <Search />
             <ModeToggle />
-            <UserNav />
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
           </div>
         </div>
       </header>
@@ -40,5 +45,5 @@ export default async function ProjectLayout({
         <Suspense>{children}</Suspense>
       </main>
     </div>
-  )
+  );
 }

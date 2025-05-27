@@ -15,26 +15,35 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Edit, MoreHorizontal, Plus } from "lucide-react";
-import { notFound } from "next/navigation";
-import { db } from "~/server/db";
-import { note_table, project_table } from "~/server/db/schema";
-import { eq } from "drizzle-orm";
+import { notFound, redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
+import { tryCatch } from "~/lib/utils";
+import { QUERIES } from "~/server/db/queries";
 
 export default async function ProjectNotesPage({
   params,
 }: {
   params: { id: string };
 }) {
+  const { userId } = await auth();
+  if (!userId) redirect("/");
   const { id } = await params; // eslint-disable-line
   const projectId = Number.parseInt(id, 10);
   if (Number.isNaN(projectId)) notFound();
 
   // Find the project by ID
-  const projectResponse = await db
-    .select()
-    .from(project_table)
-    .where(eq(project_table.id, projectId))
-    .limit(1);
+  const result = await tryCatch(
+    QUERIES.getProjectById({
+      userId,
+      projectId,
+    }),
+  );
+  if (result.error) {
+    console.error("Error while getting project", result.error);
+    throw new Error("Error while getting project");
+  }
+
+  const projectResponse = result.data;
 
   // If project not found, show 404
   if (!projectResponse[0]) {
@@ -43,11 +52,20 @@ export default async function ProjectNotesPage({
 
   const project = projectResponse[0];
 
-  // Get project-specific todos
-  const notes = await db
-    .select()
-    .from(note_table)
-    .where(eq(note_table.parentId, projectId));
+  // Get project-specific notes
+  const notesResult = await tryCatch(
+    QUERIES.getNotesByParent({
+      userId,
+      parentId: projectId,
+    }),
+  );
+  if (notesResult.error) {
+    console.error("Error while getting notes from db", notesResult.error);
+    throw new Error("Error while getting notes");
+  }
+
+  const notes = notesResult.data;
+
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">
