@@ -1,12 +1,11 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { project_table } from "~/server/db/schema";
+import { type project_table } from "~/server/db/schema";
 import { z } from "zod";
-import { db } from "~/server/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { tryCatch } from "./utils";
+import { tryCatch } from "~/lib/utils";
 import { MUTATIONS } from "~/server/db/queries";
 
 const ProjectSchema = z.object({
