@@ -17,70 +17,47 @@ import {
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
 import { notFound, redirect } from "next/navigation";
-import { db } from "~/server/db";
-import { link_table, project_table, todo_table } from "~/server/db/schema";
-import { and, eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { tryCatch } from "~/lib/utils";
 import { QUERIES } from "~/server/db/queries";
 
-export default async function ProjectDashboardPage({
-  params,
-}: {
-  params: { id: string };
+export default async function ProjectDashboardPage(props: {
+  params: Promise<{ id: number }>;
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/");
 
-  const { id } = await params; // eslint-disable-line
-  const projectId = Number.parseInt(id, 10);
-  if (Number.isNaN(projectId)) notFound();
+  const params = await props.params;
 
   const result = await tryCatch(
-    QUERIES.getProjectById({
-      userId,
-      projectId,
-    }),
+    Promise.all([
+      QUERIES.getProjectById({
+        userId,
+        projectId: params.id,
+      }),
+      QUERIES.getTodosByParent({
+        userId,
+        parentId: params.id,
+      }),
+      QUERIES.getLinksByParent({
+        userId,
+        parentId: params.id,
+      }),
+    ]),
   );
+
   if (result.error) {
-    console.error("Error while getting project", result.error);
-    throw new Error("Error while getting project");
+    console.error("Error while querieing db", result.error);
+    throw new Error("Error while querieing db");
   }
 
-  const projectResponse = result.data;
+  const [projectResponse, todos, links] = result.data;
 
   // If project not found, show 404
   if (!projectResponse[0]) {
     notFound();
   }
   const project = projectResponse[0];
-
-  // Get project-specific data
-  const todosResult = await tryCatch(
-    QUERIES.getTodosByParent({
-      userId,
-      parentId: projectId,
-    }),
-  );
-  if (todosResult.error) {
-    console.error("Error while getting todos from db", todosResult.error);
-    throw new Error("Error while getting todos");
-  }
-
-  const todos = todosResult.data;
-
-  const linksResult = await tryCatch(
-    QUERIES.getLinksByParent({
-      userId,
-      parentId: projectId,
-    }),
-  );
-  if (linksResult.error) {
-    console.error("Error while getting links from db", linksResult.error);
-    throw new Error("Error while getting links");
-  }
-
-  const links = linksResult.data;
 
   // Calculate project-specific stats
   const completedTodos = todos.filter(
@@ -97,9 +74,7 @@ export default async function ProjectDashboardPage({
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            {project?.name}
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tight">{project?.name}</h2>
           <p className="text-muted-foreground">{project?.description}</p>
         </div>
         <div className="flex items-center space-x-2">

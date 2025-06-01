@@ -6,7 +6,7 @@ import { Search } from "~/components/search";
 import { ModeToggle } from "~/components/mode-toggle";
 import { DatePicker } from "~/components/date-picker";
 import { Button } from "~/components/ui/button";
-import { createProject, type State } from "~/lib/actions";
+import { createProject, type State } from "~/server/actions";
 import { UserButton } from "@clerk/nextjs";
 import {
   Card,

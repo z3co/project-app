@@ -1,11 +1,17 @@
 import "server-only";
-import { file_table, link_table, note_table, project_table, todo_table } from "./schema";
+import {
+  file_table,
+  link_table,
+  note_table,
+  project_table,
+  todo_table,
+} from "./schema";
 import { db } from ".";
 import { eq, and } from "drizzle-orm";
 
 export const QUERIES = {
-  getProjectByUser: async function(userId: string) {
-    return await db
+  getProjectByUser: function(userId: string) {
+    return db
       .select({
         id: project_table.id,
         name: project_table.name,
@@ -15,11 +21,8 @@ export const QUERIES = {
       .from(project_table)
       .where(eq(project_table.ownerId, userId));
   },
-  getProjectById: async function(input: {
-    userId: string;
-    projectId: number;
-  }) {
-    return await db
+  getProjectById: function(input: { userId: string; projectId: number }) {
+    return db
       .select()
       .from(project_table)
       .where(
@@ -30,11 +33,21 @@ export const QUERIES = {
       )
       .limit(1);
   },
-  getFilesByParent: async function(input: {
-    userId: string;
-    parentId: number;
-  }) {
-    return await db
+  getProjectNameById: function(input: { userId: string; projectId: number }) {
+    return db
+      .select({
+        name: project_table.name,
+      })
+      .from(project_table)
+      .where(
+        and(
+          eq(project_table.id, input.projectId),
+          eq(project_table.ownerId, input.userId),
+        ),
+      );
+  },
+  getFilesByParent: function(input: { userId: string; parentId: number }) {
+    return db
       .select()
       .from(file_table)
       .where(
@@ -44,11 +57,8 @@ export const QUERIES = {
         ),
       );
   },
-  getLinksByParent: async function(input: {
-    userId: string;
-    parentId: number;
-  }) {
-    return await db
+  getLinksByParent: function(input: { userId: string; parentId: number }) {
+    return db
       .select()
       .from(link_table)
       .where(
@@ -58,11 +68,8 @@ export const QUERIES = {
         ),
       );
   },
-  getNotesByParent: async function(input: {
-    userId: string;
-    parentId: number;
-  }) {
-    return await db
+  getNotesByParent: function(input: { userId: string; parentId: number }) {
+    return db
       .select()
       .from(note_table)
       .where(
@@ -72,11 +79,8 @@ export const QUERIES = {
         ),
       );
   },
-  getTodosByParent: async function(input: {
-    userId: string;
-    parentId: number;
-  }) {
-    return await db
+  getTodosByParent: function(input: { userId: string; parentId: number }) {
+    return db
       .select()
       .from(todo_table)
       .where(
@@ -89,7 +93,9 @@ export const QUERIES = {
 };
 
 export const MUTATIONS = {
-  createProject: async function(project: Omit<typeof project_table.$inferInsert, "id">) {
-    return await db.insert(project_table).values(project).$returningId();
+  createProject: function(
+    project: Omit<typeof project_table.$inferInsert, "id">,
+  ) {
+    return db.insert(project_table).values(project).$returningId();
   },
 };
