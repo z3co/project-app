@@ -18,10 +18,7 @@ import {
 import { Badge } from "~/components/ui/badge";
 import { Search } from "~/components/search";
 import { ModeToggle } from "~/components/mode-toggle";
-import { db } from "~/server/db";
-import { project_table } from "~/server/db/schema";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 import { tryCatch } from "~/lib/utils";
 import { QUERIES } from "~/server/db/queries";

@@ -23,6 +23,7 @@ Connected db to frontend, finaly getting rid of Linting and type errors. Next up
 - [x] Creating projects
 - [ ] Editing projects
 - [ ] Deleting projects
+- [ ] Uploading files
 - [ ] Creating project items
 - [ ] Editing project items
 - [ ] Deleting project items
