@@ -47,8 +47,8 @@ export default async function ProjectDashboardPage(props: {
   );
 
   if (result.error) {
-    console.error("Error while querieing db", result.error);
-    throw new Error("Error while querieing db");
+    console.error("Error while querying db", result.error);
+    throw new Error("Error while querying db");
   }
 
   const [projectResponse, todos, links] = result.data;
