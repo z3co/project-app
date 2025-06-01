@@ -27,7 +27,7 @@ export default async function ProjectLinksPage(props: {
   if (!userId) redirect("/");
   const params = await props.params;
 
-  // Find the project by ID
+  // Query db
   const result = await tryCatch(
     Promise.all([
       QUERIES.getProjectById({

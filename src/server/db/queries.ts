@@ -44,7 +44,8 @@ export const QUERIES = {
           eq(project_table.id, input.projectId),
           eq(project_table.ownerId, input.userId),
         ),
-      );
+      )
+      .limit(1);
   },
   getFilesByParent: function(input: { userId: string; parentId: number }) {
     return db

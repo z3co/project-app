@@ -28,6 +28,7 @@ export default async function ProjectNotesPage(props: {
 
   const params = await props.params;
 
+  // Query db
   const result = await tryCatch(
     Promise.all([
       QUERIES.getProjectNameById({

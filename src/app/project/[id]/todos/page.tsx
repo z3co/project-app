@@ -29,7 +29,7 @@ export default async function ProjectTodosPage(props: {
   if (!userId) redirect("/");
   const params = await props.params;
 
-  // Querie db
+  // Query db
   const result = await tryCatch(
     Promise.all([
       QUERIES.getProjectNameById({

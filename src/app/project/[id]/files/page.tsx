@@ -27,6 +27,7 @@ export default async function ProjectFilesPage(props: {
   if (!userId) redirect("/");
   const params = await props.params;
 
+  // Query db
   const result = await tryCatch(
     Promise.all([
       QUERIES.getProjectNameById({
