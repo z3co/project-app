@@ -20,30 +20,32 @@ import { auth } from "@clerk/nextjs/server";
 import { tryCatch } from "~/lib/utils";
 import { QUERIES } from "~/server/db/queries";
 
-export default async function ProjectNotesPage({
-  params,
-}: {
-  params: { id: string };
+export default async function ProjectNotesPage(props: {
+  params: Promise<{ id: number }>;
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/");
-  const { id } = await params; // eslint-disable-line
-  const projectId = Number.parseInt(id, 10);
-  if (Number.isNaN(projectId)) notFound();
 
-  // Find the project by ID
+  const params = await props.params;
+
   const result = await tryCatch(
-    QUERIES.getProjectById({
-      userId,
-      projectId,
-    }),
+    Promise.all([
+      QUERIES.getProjectNameById({
+        userId,
+        projectId: params.id,
+      }),
+      QUERIES.getNotesByParent({
+        userId,
+        parentId: params.id,
+      }),
+    ]),
   );
   if (result.error) {
     console.error("Error while getting project", result.error);
     throw new Error("Error while getting project");
   }
 
-  const projectResponse = result.data;
+  const [projectResponse, notes] = result.data;
 
   // If project not found, show 404
   if (!projectResponse[0]) {
@@ -51,20 +53,6 @@ export default async function ProjectNotesPage({
   }
 
   const project = projectResponse[0];
-
-  // Get project-specific notes
-  const notesResult = await tryCatch(
-    QUERIES.getNotesByParent({
-      userId,
-      parentId: projectId,
-    }),
-  );
-  if (notesResult.error) {
-    console.error("Error while getting notes from db", notesResult.error);
-    throw new Error("Error while getting notes");
-  }
-
-  const notes = notesResult.data;
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

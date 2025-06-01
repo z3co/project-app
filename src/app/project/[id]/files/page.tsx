@@ -20,30 +20,31 @@ import { auth } from "@clerk/nextjs/server";
 import { tryCatch } from "~/lib/utils";
 import { QUERIES } from "~/server/db/queries";
 
-export default async function ProjectFilesPage({
-  params,
-}: {
-  params: { id: string };
+export default async function ProjectFilesPage(props: {
+  params: Promise<{ id: number }>;
 }) {
   const { userId } = await auth();
   if (!userId) redirect("/");
-  const { id } = await params; // eslint-disable-line
-  const projectId = Number.parseInt(id, 10);
-  if (Number.isNaN(projectId)) notFound();
+  const params = await props.params;
 
-  // Find the project by ID
   const result = await tryCatch(
-    QUERIES.getProjectById({
-      userId,
-      projectId,
-    }),
+    Promise.all([
+      QUERIES.getProjectNameById({
+        userId,
+        projectId: params.id,
+      }),
+      QUERIES.getFilesByParent({
+        userId,
+        parentId: params.id,
+      }),
+    ]),
   );
 
   if (result.error) {
     console.error("Error while getting project", result.error);
     throw new Error("Error while getting project");
   }
-  const projectResponse = result.data;
+  const [projectResponse, files] = result.data;
 
   // If project not found, show 404
   if (!projectResponse[0]) {
@@ -51,20 +52,6 @@ export default async function ProjectFilesPage({
   }
 
   const project = projectResponse[0];
-
-  // Get project-specific todos
-  const filesResult = await tryCatch(
-    QUERIES.getFilesByParent({
-      userId,
-      parentId: projectId,
-    }),
-  );
-  if (filesResult.error) {
-    console.error("Failed to get files from db", filesResult.error);
-    throw new Error("Failed to get files from db");
-  }
-
-  const files = filesResult.data;
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">
