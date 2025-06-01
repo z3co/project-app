@@ -27,7 +27,7 @@ export default async function ProjectsPage() {
   const { userId } = await auth();
   if (!userId) return (<SignInButton />) // Temporary until real sign in page is made
 
-  const result = await tryCatch(QUERIES.getProjectByUser(userId))
+  const result = await tryCatch(QUERIES.getProjectsForHome(userId))
   if (result.error) {
     console.error("Failed to get projects", result.error)
     throw new Error("Failed to get projects");

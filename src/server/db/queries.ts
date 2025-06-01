@@ -91,6 +91,13 @@ export const QUERIES = {
         ),
       );
   },
+  getProjectsForHome: function(userId: string) {
+    return db
+      .select()
+      .from(project_table)
+      .where(eq(project_table.ownerId, userId))
+      .limit(6);
+  },
 };
 
 export const MUTATIONS = {
