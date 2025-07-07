@@ -106,4 +106,7 @@ export const MUTATIONS = {
   ) {
     return db.insert(project_table).values(project).$returningId();
   },
+  createFile: function(file: typeof file_table.$inferInsert) {
+    return db.insert(file_table).values(file)
+  },
 };

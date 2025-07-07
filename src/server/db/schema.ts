@@ -62,6 +62,7 @@ export const file_table = tableCreator(
     createdAt: timestamp("created_at").notNull().defaultNow(),
     parentId: bigint("parent_id", { mode: "number", unsigned: true }).notNull(),
     ownerId: text("owner_id").notNull(),
+    mimeType: text("mime_type").notNull(),
   }, (t) => {
     return [
       index("owner_id_index").on(t.ownerId),
@@ -69,6 +70,8 @@ export const file_table = tableCreator(
     ]
   }
 )
+
+export type DB_FileType = typeof file_table.$inferSelect;
 
 export const note_table = tableCreator(
   "note_table",
