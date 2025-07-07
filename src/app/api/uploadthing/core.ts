@@ -1,8 +1,7 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { auth } from "@clerk/nextjs/server";
-import { MUTATIONS, QUERIES } from "~/server/db/queries";
-import { Upload } from "lucide-react";
+import { MUTATIONS } from "~/server/db/queries";
 import { z } from "zod";
 
 const f = createUploadthing();

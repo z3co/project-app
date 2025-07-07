@@ -1,7 +1,7 @@
 "use client";
 
 import type { file_table } from "~/server/db/schema";
-import { UploadButton, UploadDropzone } from "./uploadthing";
+import { UploadButton } from "./uploadthing";
 import {
   Select,
   SelectTrigger,
